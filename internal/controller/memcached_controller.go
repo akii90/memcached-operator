@@ -26,6 +26,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -53,10 +54,14 @@ type MemcachedReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Memcached object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
+// It is essential for the controller's reconciliation loop to be idempotent. By following the Operator
+// pattern you will create Controllers which provide a reconcile function
+// responsible for synchronizing resources until the desired state is reached on the cluster.
+// Breaking this recommendation goes against the design principles of controller-runtime.
+// and may lead to unforeseen consequences such as resources becoming stuck and requiring manual intervention.
+// For further info:
+// - About Operator Pattern: https://kubernetes.io/docs/concepts/extend-kubernetes/operator/
+// - About Controllers: https://kubernetes.io/docs/concepts/architecture/controller/
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.22.1/pkg/reconcile
@@ -99,6 +104,7 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// Get deploy(child resource), if not exist, create
 	found := &appsv1.Deployment{}
+	err = r.Get(ctx, types.NamespacedName{Name: memcached.Name, Namespace: memcached.Namespace}, found)
 	if err != nil && apierrors.IsNotFound(err) {
 		dep, err := r.deploymentForMemcached(memcached)
 		if err != nil {
