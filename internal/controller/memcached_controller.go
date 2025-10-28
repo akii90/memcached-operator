@@ -205,7 +205,7 @@ func (r *MemcachedReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&cachev1alpha1.Memcached{}).
 		Owns(&appsv1.Deployment{}).
-		Named("memcached").
+		// Named("memcached").
 		Complete(r)
 }
 
