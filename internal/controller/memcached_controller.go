@@ -154,6 +154,8 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	// Compare desired replica and actual replica
 	if found.Spec.Replicas == nil || *found.Spec.Replicas != desiredReplicas {
 		found.Spec.Replicas = ptr.To(desiredReplicas)
+		log.Info("Updating a Deployment",
+			"Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
 		if err = r.Update(ctx, found); err != nil {
 			log.Error(err, "Failed to update",
 				"Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
